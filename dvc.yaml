@@ -1,0 +1,114 @@
+stages:
+
+  # ══════════════════════════════════════════════
+  #              Data Ingestion
+  # ══════════════════════════════════════════════
+  data_ingestion:
+    cmd: python src/Data_Ingestion.py
+    deps:
+      - src/Data_Ingestion.py
+      - src/connections/s3_connections.py
+    params:
+      - data_ingestion.test_size
+      - data_ingestion.random_state
+      - data_ingestion.s3_key
+    outs:
+      - data/raw/train.csv
+      - data/raw/test.csv
+      - data/raw/merged.csv
+
+  # ══════════════════════════════════════════════
+  #              Data Validation
+  # ══════════════════════════════════════════════
+  data_validation:
+    cmd: python src/Data_Validation.py
+    deps:
+      - src/Data_Validation.py
+      - data/raw/train.csv
+      - data/raw/test.csv
+    params:
+      - data_validation.min_row_count
+      - data_validation.min_url_len
+      - data_validation.max_url_len
+      - data_validation.valid_labels
+
+  # ══════════════════════════════════════════════
+  #              Feature Engineering
+  # ══════════════════════════════════════════════
+  feature_engineering:
+    cmd: python src/Feature_Engineering.py
+    deps:
+      - src/Feature_Engineering.py
+      - data/raw/train.csv
+      - data/raw/test.csv
+    params:
+      - feature_engineering.columns_to_drop
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  # ══════════════════════════════════════════════
+  #              Data Preprocessing
+  # ══════════════════════════════════════════════
+  data_preprocessing:
+    cmd: python src/Data_Preprocessing.py
+    deps:
+      - src/Data_Preprocessing.py
+      - data/processed/train.csv
+      - data/processed/test.csv
+    outs:
+      - data/preprocessed/train.csv
+      - data/preprocessed/test.csv
+      - artifacts/preprocessing.pkl
+
+  # ══════════════════════════════════════════════
+  #              Model Training
+  # ══════════════════════════════════════════════
+  model_training:
+    cmd: python src/Model_Training.py
+    deps:
+      - src/Model_Training.py
+      - data/preprocessed/train.csv
+    params:
+      - model_training.n_estimators
+      - model_training.max_depth
+      - model_training.learning_rate
+      - model_training.subsample
+      - model_training.colsample_bytree
+      - model_training.min_child_weight
+      - model_training.scale_pos_weight
+      - model_training.tree_method
+      - model_training.device
+      - model_training.random_state
+      - model_training.eval_metric
+    outs:
+      - artifacts/run_id.json
+
+  # ══════════════════════════════════════════════
+  #              Model Evaluation
+  # ══════════════════════════════════════════════
+  model_evaluation:
+    cmd: python src/Model_Evaluation.py
+    deps:
+      - src/Model_Evaluation.py
+      - data/preprocessed/test.csv
+      - artifacts/run_id.json
+    params:
+      - model_evaluation.f1_threshold
+    metrics:
+      - artifacts/metrics.json
+    outs:
+      - artifacts/plots/roc_curve.png
+      - artifacts/plots/pr_curve.png
+
+  # ══════════════════════════════════════════════
+  #              Model Registry
+  # ══════════════════════════════════════════════
+  model_registry:
+    cmd: python src/Model_Registry.py
+    deps:
+      - src/Model_Registry.py
+      - artifacts/run_id.json
+      - artifacts/metrics.json
+    params:
+      - model_evaluation.f1_threshold

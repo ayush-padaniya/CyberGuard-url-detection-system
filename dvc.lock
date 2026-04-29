@@ -1,0 +1,193 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/Data_Ingestion.py
+    deps:
+    - path: src/Data_Ingestion.py
+      hash: md5
+      md5: bf6c1d50dfd2a648657736154d1fb2c0
+      size: 5182
+    - path: src/connections/s3_connections.py
+      hash: md5
+      md5: 6b5c0242518b1119358cde6d0318b502
+      size: 1940
+    params:
+      params.yaml:
+        data_ingestion.random_state: 42
+        data_ingestion.s3_key: data/Malicious-Url.csv
+        data_ingestion.test_size: 0.24
+    outs:
+    - path: data/raw/merged.csv
+      hash: md5
+      md5: 4811a37340bd7d34b508ab92f24eefdc
+      size: 151416430
+    - path: data/raw/test.csv
+      hash: md5
+      md5: 9af23a6bc031d3601143292461a680cf
+      size: 35664894
+    - path: data/raw/train.csv
+      hash: md5
+      md5: 68d15887b77489f7c17f5f43c35bd4af
+      size: 112906927
+  data_validation:
+    cmd: python src/Data_Validation.py
+    deps:
+    - path: data/raw/test.csv
+      hash: md5
+      md5: 9af23a6bc031d3601143292461a680cf
+      size: 35664894
+    - path: data/raw/train.csv
+      hash: md5
+      md5: 68d15887b77489f7c17f5f43c35bd4af
+      size: 112906927
+    - path: src/Data_Validation.py
+      hash: md5
+      md5: 4b597fc14345262d1ee8931c901f4b81
+      size: 3906
+    params:
+      params.yaml:
+        data_validation.max_url_len: 10000
+        data_validation.min_row_count: 1000
+        data_validation.min_url_len: 1
+        data_validation.valid_labels:
+        - 0
+        - 1
+        - 2
+        - 3
+  feature_engineering:
+    cmd: python src/Feature_Engineering.py
+    deps:
+    - path: data/raw/test.csv
+      hash: md5
+      md5: 9af23a6bc031d3601143292461a680cf
+      size: 35664894
+    - path: data/raw/train.csv
+      hash: md5
+      md5: 68d15887b77489f7c17f5f43c35bd4af
+      size: 112906927
+    - path: src/Feature_Engineering.py
+      hash: md5
+      md5: ab45f1343f70866163a3c71137db31de
+      size: 6644
+    params:
+      params.yaml:
+        feature_engineering.columns_to_drop:
+        - url
+        - domain
+        - scan_date
+        - type
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 75744746019452e4dc60c0e48563245e
+      size: 13025215
+    - path: data/processed/train.csv
+      hash: md5
+      md5: d7b3972803c4424a2e9223c868e56e6d
+      size: 27021977
+  data_preprocessing:
+    cmd: python src/Data_Preprocessing.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 75744746019452e4dc60c0e48563245e
+      size: 13025215
+    - path: data/processed/train.csv
+      hash: md5
+      md5: d7b3972803c4424a2e9223c868e56e6d
+      size: 27021977
+    - path: src/Data_Preprocessing.py
+      hash: md5
+      md5: 1c7e5b889a9692880d6d855bb3564e45
+      size: 3547
+    outs:
+    - path: artifacts/preprocessing.pkl
+      hash: md5
+      md5: 772c379beb75731da75f132b5d368512
+      size: 3671
+    - path: data/preprocessed/test.csv
+      hash: md5
+      md5: 5e16c006c953d7c2eaaea131f6a41ec6
+      size: 100958515
+    - path: data/preprocessed/train.csv
+      hash: md5
+      md5: fb15e8838daa96ba8b8d63a5886c08aa
+      size: 207397121
+  model_training:
+    cmd: python src/Model_Training.py
+    deps:
+    - path: data/preprocessed/train.csv
+      hash: md5
+      md5: fb15e8838daa96ba8b8d63a5886c08aa
+      size: 207397121
+    - path: src/Model_Training.py
+      hash: md5
+      md5: 87799fa8a758c2569aa0147d31e2fe2c
+      size: 4315
+    params:
+      params.yaml:
+        model_training.colsample_bytree: 1.0
+        model_training.device: cuda
+        model_training.eval_metric: mlogloss
+        model_training.learning_rate: 0.1
+        model_training.max_depth: 8
+        model_training.min_child_weight: 1
+        model_training.n_estimators: 300
+        model_training.random_state: 42
+        model_training.scale_pos_weight: 3
+        model_training.subsample: 0.8
+        model_training.tree_method: hist
+    outs:
+    - path: artifacts/run_id.json
+      hash: md5
+      md5: bfdb03a3edf350dc2e9eff5840a47b1d
+      size: 46
+  model_evaluation:
+    cmd: python src/Model_Evaluation.py
+    deps:
+    - path: artifacts/run_id.json
+      hash: md5
+      md5: bfdb03a3edf350dc2e9eff5840a47b1d
+      size: 46
+    - path: data/preprocessed/test.csv
+      hash: md5
+      md5: 5e16c006c953d7c2eaaea131f6a41ec6
+      size: 100958515
+    - path: src/Model_Evaluation.py
+      hash: md5
+      md5: 0c8f0a901f2165f160b61bb38df43d8a
+      size: 5091
+    params:
+      params.yaml:
+        model_evaluation.f1_threshold: 0.8
+    outs:
+    - path: artifacts/metrics.json
+      hash: md5
+      md5: 9bfc5b3fff9d68c1125b10896fed0f5c
+      size: 162
+    - path: artifacts/plots/pr_curve.png
+      hash: md5
+      md5: 91c1d59dd5c4e20115511dc0923c2289
+      size: 32587
+    - path: artifacts/plots/roc_curve.png
+      hash: md5
+      md5: 012b6b007b6cd1b39215b140161c9ef4
+      size: 41907
+  model_registry:
+    cmd: python src/Model_Registry.py
+    deps:
+    - path: artifacts/metrics.json
+      hash: md5
+      md5: 9bfc5b3fff9d68c1125b10896fed0f5c
+      size: 162
+    - path: artifacts/run_id.json
+      hash: md5
+      md5: bfdb03a3edf350dc2e9eff5840a47b1d
+      size: 46
+    - path: src/Model_Registry.py
+      hash: md5
+      md5: f5bf624a3b89f79291c505f8fe4e24cb
+      size: 4384
+    params:
+      params.yaml:
+        model_evaluation.f1_threshold: 0.8

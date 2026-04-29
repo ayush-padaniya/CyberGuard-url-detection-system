@@ -4,14 +4,22 @@ import pandas as pd
 import mlflow
 import mlflow.xgboost
 from xgboost import XGBClassifier
-
 from src.logger import logging
 from config.config_mlflow import setup_mlflow
+import yaml
+
+
+# ── Load params ──
+with open('params.yaml', 'r',  encoding="utf-8") as f:
+    params = yaml.safe_load(f)
+    
 # ==============================================
 #              Constants
 # ==============================================
 TRAIN_DATA_PATH = "data/preprocessed/train.csv"
 ARTIFACTS_PATH  = "artifacts/run_id.json"
+mp              = params['model_training']  # ← shortcut
+
 
 
 # ==============================================
@@ -40,24 +48,21 @@ def train_model(X, y):
         logging.info("Initializing XGBoost model with tuned parameters...")
 
         model = XGBClassifier(
-            n_estimators=300,
-            max_depth=8,
-            learning_rate=0.1,
-            subsample=0.8,
-            colsample_bytree=1.0,
-            min_child_weight=1,
-            scale_pos_weight=3,
-            tree_method="hist",
-            device="cuda",   # 🔥 GPU enabled
-            random_state=42,
-            use_label_encoder=False,
-            eval_metric="mlogloss"
+            n_estimators     = mp['n_estimators'],
+            max_depth        = mp['max_depth'],
+            learning_rate    = mp['learning_rate'],
+            subsample        = mp['subsample'],
+            colsample_bytree = mp['colsample_bytree'],
+            min_child_weight = mp['min_child_weight'],
+            scale_pos_weight = mp['scale_pos_weight'],
+            tree_method      = mp['tree_method'],
+            device           = mp['device'],
+            random_state     = mp['random_state'],
+            eval_metric      = mp['eval_metric']
         )
 
         model.fit(X, y)
-
         logging.info("Model training completed")
-
         return model
 
     except Exception as e:
@@ -119,18 +124,8 @@ def main():
 
 
             # Log parameters
-            mlflow.log_params({
-                "model": "XGBoost",
-                "n_estimators": 300,
-                "max_depth": 8,
-                "learning_rate": 0.1,
-                "subsample": 0.8,
-                "colsample_bytree": 1.0,
-                "min_child_weight": 1,
-                "scale_pos_weight": 3,
-                "tree_method": "hist",
-                "device": "cuda"
-            })
+           # Log params from yaml directly
+            mlflow.log_params(mp)
             logging.info("Parameters logged to MLflow")
 
 

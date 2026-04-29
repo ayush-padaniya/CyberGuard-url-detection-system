@@ -1,6 +1,12 @@
 import pandas as pd
 import great_expectations as ge
 from src.logger import logging
+import yaml
+
+
+# ── Load params ──
+with open('params.yaml', 'r',  encoding="utf-8") as f:
+    params = yaml.safe_load(f)
 
 # ══════════════════════════════════════════════
 #              Constants
@@ -10,6 +16,11 @@ REQUIRED_COLUMNS = [
     'having_ip_address', 'abnormal_url',
     'digits', 'letters'
 ]
+
+MIN_ROW_COUNT = params['data_validation']['min_row_count']  # ← from yaml
+VALID_LABELS  = params['data_validation']['valid_labels']   # ← from yaml
+MIN_URL_LEN   = params['data_validation']['min_url_len']    # ← from yaml
+MAX_URL_LEN   = params['data_validation']['max_url_len']    # ← from yaml
 
 def validate_data(file_path: str) -> bool:
     """Validate dataset using Great Expectations."""

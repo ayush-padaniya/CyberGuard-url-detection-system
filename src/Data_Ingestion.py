@@ -3,7 +3,11 @@ import pandas as pd
 from sklearn.model_selection import GroupShuffleSplit
 from src.logger import logging
 from src.connections.s3_connections import download_file_from_s3
+import yaml
 
+# ── Load params ──
+with open('params.yaml', 'r',  encoding="utf-8") as f:
+    params = yaml.safe_load(f)
 
 # ==============================================
 #                Constants
@@ -11,10 +15,9 @@ from src.connections.s3_connections import download_file_from_s3
 RAW_DATA_PATH     = 'data/raw/merged.csv'
 TRAIN_DATA_PATH   = 'data/raw/train.csv'
 TEST_DATA_PATH    = 'data/raw/test.csv'
-S3_KEY            = 'data/Malicious-Url.csv'
-TEST_SIZE         = 0.25
-RANDOM_STATE      = 42
-
+S3_KEY        = params['data_ingestion']['s3_key']        # ← from yaml
+TEST_SIZE     = params['data_ingestion']['test_size']     # ← from yaml
+RANDOM_STATE  = params['data_ingestion']['random_state']  # ← from yaml
 
 # ==============================================
 #        Download data from S3 bucket

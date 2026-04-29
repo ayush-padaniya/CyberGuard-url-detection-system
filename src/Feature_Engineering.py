@@ -1,6 +1,13 @@
 import os
 import pandas as pd
 from src.logger import logging
+import yaml
+
+
+
+# ── Load params ──
+with open('params.yaml', 'r',  encoding="utf-8") as f:
+    params = yaml.safe_load(f)
 
 # ==============================================
 #              Constants
@@ -11,7 +18,7 @@ TEST_DATA_PATH  = 'data/raw/test.csv'
 PROCESSED_TRAIN_PATH = 'data/processed/train.csv'
 PROCESSED_TEST_PATH  = 'data/processed/test.csv'
 
-COLUMNS_TO_DROP = ['url', 'domain', 'scan_date', 'type']
+COLUMNS_TO_DROP      = params['feature_engineering']['columns_to_drop']  # ← from yaml
 
 
 # ==============================================

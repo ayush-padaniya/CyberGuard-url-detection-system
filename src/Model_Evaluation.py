@@ -13,6 +13,12 @@ from sklearn.preprocessing import label_binarize
 
 from src.logger import logging
 from config.config_mlflow import setup_mlflow
+import yaml
+
+
+# ── Load params ──
+with open('params.yaml', 'r',  encoding="utf-8") as f:
+    params = yaml.safe_load(f)
 
 # ==============================================
 #              Constants
@@ -22,7 +28,7 @@ RUN_ID_PATH    = "artifacts/run_id.json"
 METRICS_PATH   = "artifacts/metrics.json"
 PLOTS_DIR      = "artifacts/plots"
 
-F1_THRESHOLD = 0.80
+F1_THRESHOLD   = params['model_evaluation']['f1_threshold']  # ← from yaml
 
 
 # ==============================================

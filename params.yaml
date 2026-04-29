@@ -1,0 +1,48 @@
+# ══════════════════════════════════════════════
+#              Data Ingestion
+# ══════════════════════════════════════════════
+data_ingestion:
+  test_size: 0.24
+  random_state: 42
+  s3_key: 'data/Malicious-Url.csv'
+
+# ══════════════════════════════════════════════
+#              Data Validation
+# ══════════════════════════════════════════════
+data_validation:
+  min_row_count: 1000
+  min_url_len: 1
+  max_url_len: 10000
+  valid_labels: [0, 1, 2, 3]
+
+# ══════════════════════════════════════════════
+#              Feature Engineering
+# ══════════════════════════════════════════════
+feature_engineering:
+  columns_to_drop:
+    - url
+    - domain
+    - scan_date
+    - type
+
+# ══════════════════════════════════════════════
+#              Model Training
+# ══════════════════════════════════════════════
+model_training:
+  n_estimators: 300
+  max_depth: 8
+  learning_rate: 0.1
+  subsample: 0.8
+  colsample_bytree: 1.0
+  min_child_weight: 1
+  scale_pos_weight: 3
+  tree_method: hist
+  device: cuda
+  random_state: 42
+  eval_metric: mlogloss
+
+# ══════════════════════════════════════════════
+#              Model Evaluation
+# ══════════════════════════════════════════════
+model_evaluation:
+  f1_threshold: 0.80
