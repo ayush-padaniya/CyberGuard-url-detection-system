@@ -109,10 +109,26 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
 #              Save Data
 # ==============================================
 def save_data(train_df: pd.DataFrame, test_df: pd.DataFrame):
-    """Save processed train and test data."""
-
     try:
         os.makedirs('data/processed', exist_ok=True)
+
+        # ── Remove duplicates within each set ──
+        train_df.drop_duplicates(inplace=True)
+        test_df.drop_duplicates(inplace=True)
+
+        # ── Remove train rows that appear in test ──
+        train_hashes = pd.util.hash_pandas_object(train_df, index=False)
+        test_hashes  = pd.util.hash_pandas_object(test_df, index=False)
+
+        overlap_hashes = set(train_hashes).intersection(set(test_hashes))
+        logging.info(f"Cross-file overlap found: {len(overlap_hashes)} rows")
+
+        # ── Remove overlapping rows from train ──
+        train_mask = ~train_hashes.isin(overlap_hashes)
+        train_df   = train_df[train_mask.values]
+        logging.info(f"Removed {overlap_hashes.__len__()} overlapping rows from train")
+        logging.info(f"Final train shape: {train_df.shape}")
+        logging.info(f"Final test shape:  {test_df.shape}")
 
         train_df.to_csv(PROCESSED_TRAIN_PATH, index=False)
         test_df.to_csv(PROCESSED_TEST_PATH, index=False)
@@ -123,7 +139,6 @@ def save_data(train_df: pd.DataFrame, test_df: pd.DataFrame):
     except Exception as e:
         logging.error(f"Error saving processed data: {e}")
         raise
-
 
 # ==============================================
 #              Main Function
