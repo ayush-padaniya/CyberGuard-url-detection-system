@@ -131,7 +131,11 @@ def main():
 
 
             # Log model ONLY in MLflow
-            mlflow.xgboost.log_model(model, "model")
+            mlflow.sklearn.log_model(
+            model,
+            artifact_path="model",
+            registered_model_name="CyberGuard-XGBoost"
+)
             logging.info("Model logged to MLflow")
 
 

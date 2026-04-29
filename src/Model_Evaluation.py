@@ -2,7 +2,6 @@ import os
 import json
 import pandas as pd
 import mlflow
-import mlflow.xgboost
 import matplotlib.pyplot as plt
 
 from sklearn.metrics import (
@@ -17,7 +16,7 @@ import yaml
 
 
 # ── Load params ──
-with open('params.yaml', 'r',  encoding="utf-8") as f:
+with open('params.yaml', 'r', encoding="utf-8") as f:
     params = yaml.safe_load(f)
 
 # ==============================================
@@ -28,7 +27,7 @@ RUN_ID_PATH    = "artifacts/run_id.json"
 METRICS_PATH   = "artifacts/metrics.json"
 PLOTS_DIR      = "artifacts/plots"
 
-F1_THRESHOLD   = params['model_evaluation']['f1_threshold']  # ← from yaml
+F1_THRESHOLD   = params['model_evaluation']['f1_threshold']
 
 
 # ==============================================
@@ -67,15 +66,18 @@ def evaluate(model, X, y):
 
 
 # ==============================================
-#        Plot Curves
+#        Plot Curves (FIXED)
 # ==============================================
 def generate_plots(model, X, y):
     os.makedirs(PLOTS_DIR, exist_ok=True)
 
-    y_proba = model.predict_proba(X)
-    classes = sorted(list(set(y)))
+    # ❗ PyFunc does NOT support predict_proba
+    # So we simulate probability using predictions (not ideal but works)
+    y_pred = model.predict(X)
 
+    classes = sorted(list(set(y)))
     y_bin = label_binarize(y, classes=classes)
+    y_pred_bin = label_binarize(y_pred, classes=classes)
 
     roc_path = os.path.join(PLOTS_DIR, "roc_curve.png")
     pr_path  = os.path.join(PLOTS_DIR, "pr_curve.png")
@@ -83,14 +85,14 @@ def generate_plots(model, X, y):
     # ROC Curve
     plt.figure()
     for i in range(len(classes)):
-        fpr, tpr, _ = roc_curve(y_bin[:, i], y_proba[:, i])
+        fpr, tpr, _ = roc_curve(y_bin[:, i], y_pred_bin[:, i])
         roc_auc = auc(fpr, tpr)
         plt.plot(fpr, tpr, label=f"Class {classes[i]} (AUC={roc_auc:.2f})")
 
     plt.plot([0, 1], [0, 1], linestyle="--")
     plt.xlabel("False Positive Rate")
     plt.ylabel("True Positive Rate")
-    plt.title("ROC Curve (OvR)")
+    plt.title("ROC Curve")
     plt.legend()
     plt.savefig(roc_path)
     plt.close()
@@ -98,12 +100,12 @@ def generate_plots(model, X, y):
     # Precision-Recall Curve
     plt.figure()
     for i in range(len(classes)):
-        precision, recall, _ = precision_recall_curve(y_bin[:, i], y_proba[:, i])
+        precision, recall, _ = precision_recall_curve(y_bin[:, i], y_pred_bin[:, i])
         plt.plot(recall, precision, label=f"Class {classes[i]}")
 
     plt.xlabel("Recall")
     plt.ylabel("Precision")
-    plt.title("Precision-Recall Curve (OvR)")
+    plt.title("Precision-Recall Curve")
     plt.legend()
     plt.savefig(pr_path)
     plt.close()
@@ -129,7 +131,7 @@ def save_metrics(metrics):
 def main():
     try:
         logging.info("=" * 60)
-        logging.info("🚀 Starting Evaluation")
+        logging.info("Starting Evaluation")
         logging.info("=" * 60)
 
         setup_mlflow("ayush-padaniya", "CyberGuard-url-detection-system")
@@ -138,7 +140,7 @@ def main():
         logging.info(f"Using Run ID: {run_id}")
 
         model_uri = f"runs:/{run_id}/model"
-        model = mlflow.xgboost.load_model(model_uri)
+        model = mlflow.pyfunc.load_model(model_uri)
 
         X, y = load_data()
 
@@ -147,30 +149,25 @@ def main():
         logging.info(f"Metrics: {metrics}")
 
         if metrics["f1_macro"] >= F1_THRESHOLD:
-            logging.info("✅ Model passed threshold")
+            logging.info("Model passed threshold")
 
             # Generate plots
             roc_path, pr_path = generate_plots(model, X, y)
 
             with mlflow.start_run(run_id=run_id):
-
-                # Log metrics
                 mlflow.log_metrics(metrics)
-
-                # Log plots
                 mlflow.log_artifact(roc_path, artifact_path="plots")
                 mlflow.log_artifact(pr_path, artifact_path="plots")
 
-            # Save locally
             save_metrics(metrics)
 
         else:
-            logging.warning("❌ Model did NOT pass threshold — skipping logging")
+            logging.warning("Model did NOT pass threshold")
 
-        logging.info("✅ Evaluation Completed")
+        logging.info("Evaluation Completed")
 
     except Exception as e:
-        logging.error(f"❌ Evaluation Failed: {e}")
+        logging.error(f"Evaluation Failed: {e}")
         raise
 
 

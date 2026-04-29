@@ -122,15 +122,15 @@ stages:
       size: 207397121
     - path: src/Model_Training.py
       hash: md5
-      md5: 87799fa8a758c2569aa0147d31e2fe2c
-      size: 4315
+      md5: 463ce35db73ce12c82a131b2f3570bd8
+      size: 4415
     params:
       params.yaml:
         model_training.colsample_bytree: 1.0
         model_training.device: cuda
         model_training.eval_metric: mlogloss
         model_training.learning_rate: 0.1
-        model_training.max_depth: 8
+        model_training.max_depth: 9
         model_training.min_child_weight: 1
         model_training.n_estimators: 300
         model_training.random_state: 42
@@ -140,14 +140,14 @@ stages:
     outs:
     - path: artifacts/run_id.json
       hash: md5
-      md5: bfdb03a3edf350dc2e9eff5840a47b1d
+      md5: 6e0440a42788a26a4406458a51fbc1b7
       size: 46
   model_evaluation:
     cmd: python src/Model_Evaluation.py
     deps:
     - path: artifacts/run_id.json
       hash: md5
-      md5: bfdb03a3edf350dc2e9eff5840a47b1d
+      md5: 6e0440a42788a26a4406458a51fbc1b7
       size: 46
     - path: data/preprocessed/test.csv
       hash: md5
@@ -155,7 +155,7 @@ stages:
       size: 100958515
     - path: src/Model_Evaluation.py
       hash: md5
-      md5: 0c8f0a901f2165f160b61bb38df43d8a
+      md5: 07dbdb76e8cc93de9291266d6ea1c682
       size: 5091
     params:
       params.yaml:
@@ -163,26 +163,26 @@ stages:
     outs:
     - path: artifacts/metrics.json
       hash: md5
-      md5: 9bfc5b3fff9d68c1125b10896fed0f5c
+      md5: 9e14617fcb1dec6eb022b84b66031cdc
       size: 162
     - path: artifacts/plots/pr_curve.png
       hash: md5
-      md5: 91c1d59dd5c4e20115511dc0923c2289
-      size: 32587
+      md5: 40eb57b19cf4c2451725f4ce36e3f215
+      size: 35590
     - path: artifacts/plots/roc_curve.png
       hash: md5
-      md5: 012b6b007b6cd1b39215b140161c9ef4
-      size: 41907
+      md5: 14933fdb339f70cf3e95cf2df92c7396
+      size: 43744
   model_registry:
     cmd: python src/Model_Registry.py
     deps:
     - path: artifacts/metrics.json
       hash: md5
-      md5: 9bfc5b3fff9d68c1125b10896fed0f5c
+      md5: 9e14617fcb1dec6eb022b84b66031cdc
       size: 162
     - path: artifacts/run_id.json
       hash: md5
-      md5: bfdb03a3edf350dc2e9eff5840a47b1d
+      md5: 6e0440a42788a26a4406458a51fbc1b7
       size: 46
     - path: src/Model_Registry.py
       hash: md5
