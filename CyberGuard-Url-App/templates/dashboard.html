@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard — Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="bg-animation">
+    <div class="grid-overlay"></div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="nav-brand">
+        <i class="fas fa-shield-alt"></i>
+        <span>CyberGuard</span>
+    </div>
+    <div class="nav-links">
+        <a href="/"><i class="fas fa-home"></i> Home</a>
+        <a href="/dashboard" class="active"><i class="fas fa-chart-bar"></i> Dashboard</a>
+    </div>
+</nav>
+
+<!-- Dashboard -->
+<div class="dashboard">
+    <h1 class="dash-title">
+        <i class="fas fa-tachometer-alt"></i>
+        Live <span class="highlight">Dashboard</span>
+    </h1>
+
+    <!-- Model Info -->
+    <div class="model-info-bar">
+        <span><i class="fas fa-robot"></i> Model: {{ model_name }}</span>
+        <span><i class="fas fa-code-branch"></i> Version: {{ model_version }}</span>
+        <span><i class="fas fa-check-circle" style="color:#00ff88"></i> Status: Production</span>
+        <span><i class="fas fa-database"></i> Total Scans: {{ total_predictions }}</span>
+    </div>
+
+    <!-- Metrics Cards -->
+    <div class="dash-metrics">
+        <div class="dash-metric-card">
+            <div class="metric-icon" style="color:#00ff88"><i class="fas fa-bullseye"></i></div>
+            <h2>{{ "%.1f"|format(metrics.get('accuracy', 0) * 100) }}%</h2>
+            <p>Accuracy</p>
+        </div>
+        <div class="dash-metric-card">
+            <div class="metric-icon" style="color:#00aaff"><i class="fas fa-chart-line"></i></div>
+            <h2>{{ "%.1f"|format(metrics.get('f1_macro', 0) * 100) }}%</h2>
+            <p>F1 Score</p>
+        </div>
+        <div class="dash-metric-card">
+            <div class="metric-icon" style="color:#ff9900"><i class="fas fa-crosshairs"></i></div>
+            <h2>{{ "%.1f"|format(metrics.get('precision_macro', 0) * 100) }}%</h2>
+            <p>Precision</p>
+        </div>
+        <div class="dash-metric-card">
+            <div class="metric-icon" style="color:#ff4444"><i class="fas fa-redo"></i></div>
+            <h2>{{ "%.1f"|format(metrics.get('recall_macro', 0) * 100) }}%</h2>
+            <p>Recall</p>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row">
+        <!-- Threat Distribution -->
+        <div class="chart-card">
+            <h3><i class="fas fa-chart-pie"></i> Threat Distribution</h3>
+            <canvas id="threatChart"></canvas>
+        </div>
+
+        <!-- Recent Predictions -->
+        <div class="chart-card">
+            <h3><i class="fas fa-history"></i> Recent Scans</h3>
+            {% if prediction_history %}
+            <div class="predictions-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>URL</th>
+                            <th>Result</th>
+                            <th>Confidence</th>
+                            <th>Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pred in prediction_history|reverse %}
+                        <tr>
+                            <td class="url-cell">{{ pred.url }}</td>
+                            <td class="tone-text-{{ pred.risk_class }}">{{ pred.prediction }}</td>
+                            <td>{{ pred.confidence }}%</td>
+                            <td>
+                                <span class="risk-badge tone-{{ pred.risk_class }}">
+                                    {{ pred.risk }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="no-data">
+                <i class="fas fa-search"></i>
+                <p>No scans yet — go scan some URLs!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Risk Level Chart -->
+    <div class="chart-card full-width">
+        <h3><i class="fas fa-chart-bar"></i> Model Performance Overview</h3>
+        <canvas id="performanceChart"></canvas>
+    </div>
+</div>
+
+<script id="performanceData" type="application/json">{{ performance_values|tojson }}</script>
+<script>
+// Threat Distribution Chart
+const threatCtx = document.getElementById('threatChart').getContext('2d');
+new Chart(threatCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Benign', 'Defacement', 'Phishing', 'Malware'],
+        datasets: [{
+            data: [65, 15, 12, 8],
+            backgroundColor: ['#00ff88', '#ff9900', '#ff4444', '#ff0000'],
+            borderColor: '#0a0a0a',
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: { color: '#ffffff', font: { family: 'Rajdhani' } }
+            }
+        }
+    }
+});
+
+// Performance Chart
+const perfCtx = document.getElementById('performanceChart').getContext('2d');
+new Chart(perfCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Accuracy', 'F1 Score', 'Precision', 'Recall'],
+        datasets: [{
+            label: 'Model Performance (%)',
+            data: JSON.parse(document.getElementById('performanceData').textContent),
+            backgroundColor: ['#00ff8844','#00aaff44','#ff990044','#ff444444'],
+            borderColor: ['#00ff88','#00aaff','#ff9900','#ff4444'],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: { color: '#aaa' },
+                grid: { color: '#ffffff11' }
+            },
+            x: {
+                ticks: { color: '#aaa' },
+                grid: { color: '#ffffff11' }
+            }
+        },
+        plugins: {
+            legend: {
+                labels: { color: '#ffffff' }
+            }
+        }
+    }
+});
+</script>
+</body>
+</html>

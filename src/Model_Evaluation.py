@@ -3,6 +3,8 @@ import json
 import pandas as pd
 import mlflow
 import matplotlib.pyplot as plt
+import mlflow.xgboost
+
 
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score,
@@ -140,7 +142,7 @@ def main():
         logging.info(f"Using Run ID: {run_id}")
 
         model_uri = f"runs:/{run_id}/model"
-        model = mlflow.pyfunc.load_model(model_uri)
+        model = mlflow.xgboost.load_model(model_uri)
 
         X, y = load_data()
 

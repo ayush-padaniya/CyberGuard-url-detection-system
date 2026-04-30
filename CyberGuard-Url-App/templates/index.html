@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberGuard — URL Threat Detection</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- Animated background -->
+<div class="bg-animation">
+    <div class="grid-overlay"></div>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="nav-brand">
+        <i class="fas fa-shield-alt"></i>
+        <span>CyberGuard</span>
+    </div>
+    <div class="nav-links">
+        <a href="/" class="active"><i class="fas fa-home"></i> Home</a>
+        <a href="/dashboard"><i class="fas fa-chart-bar"></i> Dashboard</a>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<div class="hero">
+    <div class="hero-content">
+        <div class="shield-icon">
+            <i class="fas fa-shield-virus"></i>
+        </div>
+        <h1>URL <span class="highlight">Threat</span> Detection</h1>
+        <p class="subtitle">AI-powered cybersecurity — detect phishing, malware & defacement in real time</p>
+
+        <!-- Input Form -->
+        <form action="/predict" method="post" class="url-form">
+            <div class="input-group">
+                <i class="fas fa-link input-icon"></i>
+                <input
+                    type="text"
+                    name="url"
+                    placeholder="Enter URL to analyze... e.g. https://example.com"
+                    value="{{ url if url else '' }}"
+                    required
+                    autocomplete="off"
+                />
+                <button type="submit" class="scan-btn">
+                    <i class="fas fa-search"></i> Scan
+                </button>
+            </div>
+        </form>
+
+        <!-- Result -->
+        {% if show_result %}
+        <div class="result-card tone-{{ risk_class }}">
+            <div class="result-icon">{{ icon }}</div>
+            <div class="result-info">
+                <h2>{{ prediction }}</h2>
+                <p class="url-display">{{ url }}</p>
+                <div class="result-meta">
+                    <span class="badge">
+                        Risk: {{ risk }}
+                    </span>
+                    <span class="confidence">Confidence: {{ confidence }}%</span>
+                </div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" data-confidence="{{ confidence|default(0) }}"></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="error-card">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>Error: {{ error }}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Signal Matrix -->
+<div class="signal-section">
+    <div class="signal-header">
+        <h2>Detection <span class="highlight">Signal Matrix</span></h2>
+        <p>Operational signals used to separate trusted URLs from active threat patterns.</p>
+    </div>
+    <div class="signal-grid">
+        <div class="signal-card">
+            <i class="fas fa-route"></i>
+            <h3>URL Structure</h3>
+            <p>Length, symbols, redirects, encoded characters, path depth, and parameter density.</p>
+        </div>
+        <div class="signal-card">
+            <i class="fas fa-fingerprint"></i>
+            <h3>Identity Clues</h3>
+            <p>Brand mentions, subdomain tricks, IP hosts, shorteners, and suspicious domain patterns.</p>
+        </div>
+        <div class="signal-card">
+            <i class="fas fa-lock"></i>
+            <h3>Trust Signals</h3>
+            <p>HTTPS, SSL posture, live status, security headers, and site-level safety indicators.</p>
+        </div>
+        <div class="signal-card">
+            <i class="fas fa-bug"></i>
+            <h3>Payload Risk</h3>
+            <p>Executable downloads, hacked paths, credential traps, urgency terms, and malware cues.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Threat Types -->
+<div class="threats-section">
+    <h2>Detected <span class="highlight">Threat Types</span></h2>
+    <div class="threat-cards">
+        <div class="threat-card safe">
+            <i class="fas fa-check-circle"></i>
+            <h3>Benign</h3>
+            <p>Safe and legitimate URLs</p>
+        </div>
+        <div class="threat-card warning">
+            <i class="fas fa-paint-brush"></i>
+            <h3>Defacement</h3>
+            <p>Compromised or defaced websites</p>
+        </div>
+        <div class="threat-card danger">
+            <i class="fas fa-fish"></i>
+            <h3>Phishing</h3>
+            <p>Credential stealing attacks</p>
+        </div>
+        <div class="threat-card critical">
+            <i class="fas fa-skull-crossbones"></i>
+            <h3>Malware</h3>
+            <p>Malicious software distribution</p>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/main.js"></script>
+</body>
+</html>
