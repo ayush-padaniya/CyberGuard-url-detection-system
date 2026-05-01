@@ -24,7 +24,7 @@ jobs:
       # ── Step 3: Install dependencies ──
       - name: Install Dependencies
         run: |
-          pip install -r requirements-ci.txt
+          pip install -r requirements.txt
           pip install -e .
           echo "Dependencies installed"
 
