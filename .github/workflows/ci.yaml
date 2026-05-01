@@ -24,10 +24,9 @@ jobs:
       # ── Step 3: Install dependencies ──
       - name: Install Dependencies
         run: |
-         pip install -r requirements.txt
-         pip install dvc dvc-s3
-         pip install -e .        # ← this handles local package install
-         echo "Dependencies installed"
+          pip install -r requirements-ci.txt
+          pip install -e .
+          echo "Dependencies installed"
 
       # ── Step 4: Configure AWS credentials ──
       - name: Configure AWS Credentials
@@ -37,37 +36,41 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region:            ${{ secrets.AWS_REGION }}
 
-      # ── Step 5: Setup environment variables ──
-      - name: Setup Environment Variables
-        run: |
-          echo "MLFLOW_TRACKING_USERNAME=${{ secrets.DAGSHUB_USERNAME }}" >> $GITHUB_ENV
-          echo "MLFLOW_TRACKING_PASSWORD=${{ secrets.DAGSHUB_TOKEN }}" >> $GITHUB_ENV
-          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> $GITHUB_ENV
-
-      # ── Step 6: DVC Pull (get all tracked files from S3) ──
+      # ── Step 5: DVC Pull (get all tracked files from S3) ──
       - name: DVC Pull
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:    ${{ secrets.AWS_REGION }}
         run: |
           dvc pull
           echo "DVC pull completed"
 
-      # ── Step 7: Run DVC Pipeline ──
+      # ── Step 6: Run DVC Pipeline ──
       - name: Run DVC Pipeline
+        env:
+          MLFLOW_TRACKING_USERNAME: ${{ secrets.DAGSHUB_USERNAME }}
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.DAGSHUB_TOKEN }}
+          S3_BUCKET_NAME:           ${{ secrets.S3_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID:        ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY:    ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:       ${{ secrets.AWS_REGION }}
         run: |
           dvc repro
           echo "DVC pipeline completed"
 
-      # ── Step 8: Login to Amazon ECR ──
+      # ── Step 7: Login to Amazon ECR ──
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      # ── Step 9: Build Docker image ──
+      # ── Step 8: Build Docker image ──
       - name: Build Docker Image
         run: |
           docker build -t ${{ secrets.ECR_REPOSITORY }} .
           echo "Docker image built successfully"
 
-      # ── Step 10: Tag Docker image ──
+      # ── Step 9: Tag Docker image ──
       - name: Tag Docker Image
         run: |
           docker tag ${{ secrets.ECR_REPOSITORY }}:latest \
@@ -75,14 +78,14 @@ jobs:
           docker tag ${{ secrets.ECR_REPOSITORY }}:latest \
             ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
 
-      # ── Step 11: Push to ECR ──
+      # ── Step 10: Push to ECR ──
       - name: Push to Amazon ECR
         run: |
           docker push ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
           docker push ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
           echo "Image pushed to ECR successfully"
 
-      # ── Step 12: Print image URI ──
+      # ── Step 11: Print image URI ──
       - name: Print Image URI
         run: |
           echo "Image URI: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest"
