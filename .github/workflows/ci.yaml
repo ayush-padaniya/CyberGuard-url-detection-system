@@ -24,7 +24,7 @@ jobs:
       # ── Step 3: Install dependencies ──
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r requirements-ci.txt
           pip install -e .
           echo "Dependencies installed"
 
@@ -36,7 +36,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region:            ${{ secrets.AWS_REGION }}
 
-      # ── Step 5: DVC Pull (get all tracked files from S3) ──
+      # ── Step 5: DVC Pull ──
       - name: DVC Pull
         env:
           AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -46,45 +46,57 @@ jobs:
           dvc pull
           echo "DVC pull completed"
 
-        # ── Step 6: Run DVC Pipeline ──
+      # ── Step 6: Run DVC Pipeline ──
       - name: Run DVC Pipeline
         env:
-          DAGSHUB_USERNAME:      ${{ secrets.DAGSHUB_USERNAME }}  # ← matches code
-          DAGSHUB_TOKEN:         ${{ secrets.DAGSHUB_TOKEN }}     # ← matches code
+          DAGSHUB_USERNAME:      ${{ secrets.DAGSHUB_USERNAME }}
+          DAGSHUB_TOKEN:         ${{ secrets.DAGSHUB_TOKEN }}
           S3_BUCKET_NAME:        ${{ secrets.S3_BUCKET_NAME }}
           AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION:    ${{ secrets.AWS_REGION }}
         run: |
-         dvc repro
-         echo "DVC pipeline completed"
+          dvc repro
+          echo "DVC pipeline completed"
 
       # ── Step 7: Login to Amazon ECR ──
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-     # ── Step 8: Build Docker image ──
+      # ── Step 8: Build Docker image ──
       - name: Build Docker Image
+        env:
+          ECR_REGISTRY:   ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-         docker build -t ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest .
-         echo "Docker image built successfully"
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          echo "Docker image built successfully"
 
-    # ── Step 9: Tag Docker image ──
+      # ── Step 9: Tag Docker image ──
       - name: Tag Docker Image
+        env:
+          ECR_REGISTRY:   ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-         docker tag ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest \
-         ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
-         echo "Image tagged successfully"
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+          echo "Image tagged successfully"
 
-    # ── Step 10: Push to ECR ──
+      # ── Step 10: Push to ECR ──
       - name: Push to Amazon ECR
+        env:
+          ECR_REGISTRY:   ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-         docker push ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
-         docker push ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
-         echo "Image pushed to ECR successfully"
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+          echo "Image pushed to ECR successfully"
 
       # ── Step 11: Print image URI ──
       - name: Print Image URI
+        env:
+          ECR_REGISTRY:   ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
         run: |
-          echo "Image URI: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest"
+          echo "Image URI: $ECR_REGISTRY/$ECR_REPOSITORY:latest"
