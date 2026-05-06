@@ -1,0 +1,45 @@
+services:
+
+  cyberguard-app:
+    image: 257289932997.dkr.ecr.eu-north-1.amazonaws.com/cyberguard-url-app:latest
+    container_name: cyberguard-app
+    ports:
+      - "8000:8000"
+    environment:
+      - DAGSHUB_USERNAME=${DAGSHUB_USERNAME}
+      - DAGSHUB_TOKEN=${DAGSHUB_TOKEN}
+      - S3_BUCKET_NAME=${S3_BUCKET_NAME}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_REGION}
+    networks:
+      - cyberguard-network
+
+  prometheus:
+   image: prom/prometheus:latest
+   container_name: prometheus
+   ports:
+    - "9090:9090"
+   volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+   networks:
+    - cyberguard-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - cyberguard-network
+
+networks:
+  cyberguard-network:
+    driver: bridge
+
+volumes:
+  grafana-storage:
