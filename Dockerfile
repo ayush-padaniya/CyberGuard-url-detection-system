@@ -13,7 +13,8 @@ RUN apt-get update \
 
 COPY requirements.txt /tmp/app-requirements.txt
 RUN pip install --upgrade pip \
-    && pip install -r /tmp/app-requirements.txt
+    && pip install -r /tmp/app-requirements.txt \
+    && pip uninstall -y multipart
 
 COPY CyberGuard-Url-App ./CyberGuard-Url-App
 COPY src ./src
