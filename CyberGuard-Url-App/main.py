@@ -10,7 +10,6 @@ import pandas as pd
 import mlflow
 import mlflow.pyfunc
 import mlflow.xgboost
-import dagshub
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 from fastapi import FastAPI, Request, Form
@@ -25,13 +24,8 @@ from monitoring.evidently_monitor import run_evidently_report
 # ══════════════════════════════════════════════
 #         MLflow + DagsHub Setup
 # ══════════════════════════════════════════════
-dagshub.init(
-    repo_owner='ayush-padaniya',
-    repo_name='CyberGuard-url-detection-system',
-    mlflow=True,
-    token=os.getenv("DAGSHUB_TOKEN")  
-)
-
+os.environ["MLFLOW_TRACKING_USERNAME"] = os.getenv("DAGSHUB_USERNAME", "")
+os.environ["MLFLOW_TRACKING_PASSWORD"] = os.getenv("DAGSHUB_TOKEN", "")
 mlflow.set_tracking_uri(
     "https://dagshub.com/ayush-padaniya/CyberGuard-url-detection-system.mlflow"
 )
