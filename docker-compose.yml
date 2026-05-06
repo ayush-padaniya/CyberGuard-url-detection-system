@@ -13,7 +13,8 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_REGION}
     volumes:
-      - ./monitoring/reports:/app/monitoring/reports  # ← only this added
+      - ./data/preprocessed:/app/data/preprocessed
+      - ./monitoring/reports:/app/monitoring/reports  
     networks:
       - cyberguard-network
 

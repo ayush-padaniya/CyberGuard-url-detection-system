@@ -20,7 +20,6 @@ COPY src ./src
 COPY artifacts/preprocessing.pkl ./artifacts/preprocessing.pkl
 COPY artifacts/metrics.json ./artifacts/metrics.json
 COPY monitoring ./monitoring
-COPY data/preprocessed ./data/preprocessed
 
 RUN mkdir -p monitoring/reports
 
