@@ -19,10 +19,10 @@ COPY CyberGuard-Url-App ./CyberGuard-Url-App
 COPY src ./src
 COPY artifacts/preprocessing.pkl ./artifacts/preprocessing.pkl
 COPY artifacts/metrics.json ./artifacts/metrics.json
-COPY monitoring ./monitoring                          # ← add this
-COPY data/preprocessed ./data/preprocessed           # ← add this
+COPY monitoring ./monitoring
+COPY data/preprocessed ./data/preprocessed
 
-RUN mkdir -p monitoring/reports                      # ← add this
+RUN mkdir -p monitoring/reports
 
 EXPOSE 8000
 
