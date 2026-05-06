@@ -11,7 +11,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY CyberGuard-Url-App/requirements.txt /tmp/app-requirements.txt
+COPY requirements.txt /tmp/app-requirements.txt
 RUN pip install --upgrade pip \
     && pip install -r /tmp/app-requirements.txt
 
@@ -19,6 +19,10 @@ COPY CyberGuard-Url-App ./CyberGuard-Url-App
 COPY src ./src
 COPY artifacts/preprocessing.pkl ./artifacts/preprocessing.pkl
 COPY artifacts/metrics.json ./artifacts/metrics.json
+COPY monitoring ./monitoring                          # ← add this
+COPY data/preprocessed ./data/preprocessed           # ← add this
+
+RUN mkdir -p monitoring/reports                      # ← add this
 
 EXPOSE 8000
 

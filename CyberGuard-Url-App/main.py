@@ -19,6 +19,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
 from src.logger import logging
+from fastapi.responses import FileResponse
+from monitoring.evidently_monitor import run_evidently_report
 
 # ══════════════════════════════════════════════
 #         MLflow + DagsHub Setup
@@ -413,6 +415,13 @@ async def model_info():
 async def get_history():
     return {"history": prediction_history}
 
+@app.get("/monitoring/report")
+async def evidently_report():
+    report_path = "monitoring/reports/evidently_report.html"
+    os.makedirs("monitoring/reports", exist_ok=True)
+    if not os.path.exists(report_path):
+        run_evidently_report()
+    return FileResponse(report_path, media_type="text/html")
 
 # ── Prometheus metrics endpoint ──
 @app.get("/metrics")
