@@ -227,54 +227,77 @@ CyberGuard-url-detection-system/
 
 ## 🔄 ML Pipeline
 
-The pipeline is fully automated using DVC and runs on every push:
-
 ```
-Data Ingestion
-      ↓
-  Download from S3
-  URL Deduplication
-  Leakage-safe Group Split (by URL)
-      ↓
-Data Validation (Great Expectations)
-      ↓
-  Row count check
-  Required columns check
-  No nulls validation
-  Label value validation
-  URL length range check
-      ↓
-Feature Engineering
-      ↓
-  57 URL features extracted
-  digit_letter_ratio
-  special_char_ratio
-  url_complexity
-      ↓
-Data Preprocessing
-      ↓
-  StandardScaler (fit on train only)
-  Scaler saved to artifacts/
-      ↓
-Model Training
-      ↓
-  XGBoost Classifier
-  Logged to MLflow/DagsHub
-  Run ID saved locally
-      ↓
-Model Evaluation
-      ↓
-  Accuracy, F1, Precision, Recall
-  ROC Curve, PR Curve
-  F1 threshold check (≥ 0.80)
-      ↓
-Model Registry
-      ↓
-  Registered in MLflow Model Registry
-  Promoted to Production alias
+┌─────────────────────────────────────────┐
+│           📥 DATA INGESTION             │
+│─────────────────────────────────────────│
+│  ▸ Download raw data from AWS S3        │
+│  ▸ Remove duplicate URLs               │
+│  ▸ Leakage-safe group split by URL     │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────┐
+│         ✅ DATA VALIDATION              │
+│         (Great Expectations)            │
+│─────────────────────────────────────────│
+│  ▸ Minimum row count check             │
+│  ▸ Required columns exist              │
+│  ▸ No nulls in features or label       │
+│  ▸ Valid label values (0,1,2,3)        │
+│  ▸ URL length in valid range           │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────┐
+│         ⚙️ FEATURE ENGINEERING          │
+│─────────────────────────────────────────│
+│  ▸ 57 URL features extracted           │
+│  ▸ digit_letter_ratio                  │
+│  ▸ special_char_ratio                  │
+│  ▸ url_complexity                      │
+│  ▸ Security signals (https, ip, @)     │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────┐
+│         🔧 DATA PREPROCESSING           │
+│─────────────────────────────────────────│
+│  ▸ StandardScaler fit on train only    │
+│  ▸ Transform applied to test set       │
+│  ▸ Scaler saved to artifacts/          │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────┐
+│         🤖 MODEL TRAINING               │
+│─────────────────────────────────────────│
+│  ▸ XGBoost Classifier                  │
+│  ▸ Parameters logged to MLflow         │
+│  ▸ Model logged to DagsHub             │
+│  ▸ Run ID saved locally                │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────┐
+│         📊 MODEL EVALUATION             │
+│─────────────────────────────────────────│
+│  ▸ Accuracy, F1, Precision, Recall     │
+│  ▸ ROC Curve + PR Curve generated      │
+│  ▸ F1 threshold check (≥ 0.80)        │
+│  ▸ Metrics logged to MLflow            │
+└──────────────────┬──────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────┐
+│         🏆 MODEL REGISTRY               │
+│─────────────────────────────────────────│
+│  ▸ Registered in MLflow Model Registry │
+│  ▸ Version auto-incremented            │
+│  ▸ Promoted to Production alias        │
+└─────────────────────────────────────────┘
 ```
 
----
 
 ## 📡 Monitoring
 
