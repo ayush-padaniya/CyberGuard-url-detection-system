@@ -173,56 +173,57 @@ CyberGuard-url-detection-system/
 │
 ├── .github/
 │   └── workflows/
-│       └── ci.yaml                  ← CI/CD Pipeline
+│       └── ci.yaml                  ← CI/CD Pipeline (GitHub Actions)
 │
-├── CyberGuard-Url-App/
-│   ├── main.py                      ← FastAPI App
-│   ├── templates/
-│   │   ├── index.html               ← Home Page
-│   │   └── dashboard.html           ← Dashboard Page
-│   └── static/
-│       ├── css/style.css
-│       └── js/main.js
+├── CyberGuard-Url-App/              ← FastAPI Application
+│   ├── main.py                      ← App entry point + routes
+│   ├── templates/                   ← Jinja2 HTML templates
+│   └── static/                      ← CSS, JS assets
 │
-├── src/
-│   ├── logger/
-│   ├── connections/
+├── src/                             ← ML Pipeline source code
+│   ├── logger/                      ← Custom logging
+│   ├── connections/                 ← S3 connections
 │   └── pipeline/
-│       ├── Data_Ingestion.py
-│       ├── Data_Validation.py
-│       ├── Data_Preprocessing.py
-│       ├── Feature_Engineering.py
-│       ├── Model_Training.py
-│       ├── Model_Evaluation.py
-│       └── Model_Registry.py
+│       ├── Data_Ingestion.py        ← S3 download + train/test split
+│       ├── Data_Validation.py       ← Great Expectations checks
+│       ├── Data_Preprocessing.py   ← StandardScaler
+│       ├── Feature_Engineering.py  ← 57 URL features
+│       ├── Model_Training.py        ← XGBoost training
+│       ├── Model_Evaluation.py      ← Metrics + plots
+│       └── Model_Registry.py        ← MLflow registry
 │
-├── monitoring/
-│   ├── prometheus.yml               ← Prometheus Config
-│   ├── evidently_monitor.py         ← Drift Detection
-│   └── reports/                     ← Generated Reports
+├── monitoring/                      ← Monitoring stack
+│   ├── prometheus.yml               ← Prometheus scrape config
+│   ├── evidently_monitor.py         ← Drift detection reports
+│   └── reports/                     ← Generated HTML reports
 │
-├── artifacts/
-│   ├── preprocessing.pkl            ← Saved Scaler
-│   ├── metrics.json                 ← Model Metrics
-│   └── plots/                       ← ROC, PR Curves
+├── artifacts/                       ← Model artifacts
+│   ├── preprocessing.pkl            ← Saved StandardScaler
+│   ├── metrics.json                 ← Model evaluation metrics
+│   ├── run_id.json                  ← MLflow run ID
+│   └── plots/                       ← ROC + PR curves
 │
-├── data/                            ← DVC Tracked
-│   ├── raw/
-│   ├── processed/
-│   └── preprocessed/
+├── notebook/                        ← EDA + experimentation
+│
+├── gx/                              ← Great Expectations config
 │
 ├── config/
-│   └── config_mlflow.py
+│   └── config_mlflow.py             ← MLflow + DagsHub setup
 │
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── params.yaml
-├── dvc.yaml
+├── .dvc/                            ← DVC configuration
+├── .dockerignore
+├── .dvcignore
+├── .gitignore
+├── check_leakage.py                 ← Data leakage check script
+├── Dockerfile                       ← Container definition
+├── docker-compose.yml               ← Multi-service orchestration
+├── dvc.yaml                         ← DVC pipeline stages
+├── dvc.lock                         ← DVC pipeline lock file
+├── params.yaml                      ← Pipeline hyperparameters
+├── pyproject.toml                   ← Python project config
+├── requirements.txt                 ← Dependencies
 └── README.md
 ```
-
----
 
 ## 🔄 ML Pipeline
 
