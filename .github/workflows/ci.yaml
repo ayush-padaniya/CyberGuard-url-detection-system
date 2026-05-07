@@ -64,7 +64,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-  # ── Step 8: Build Docker image ──
+      # ── Step 8: Build Docker image ──
       - name: Build Docker Image
         run: |
           docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REGISTRY }}:latest .
@@ -85,3 +85,60 @@ jobs:
       - name: Print Image URI
         run: |
           echo "Image URI: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REGISTRY }}:latest"
+
+  # ══════════════════════════════════════════
+  #           CD — Deploy to EC2
+  # ══════════════════════════════════════════
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      # ── Step 1: Checkout code ──
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # ── Step 2: Setup SSH key ──
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/cyberguard-key.pem
+          chmod 600 ~/.ssh/cyberguard-key.pem
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      # ── Step 3: Deploy to EC2 ──
+      - name: Deploy to EC2
+        run: |
+          ssh -i ~/.ssh/cyberguard-key.pem -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            # ── Set environment variables ──
+            export DAGSHUB_USERNAME="${{ secrets.DAGSHUB_USERNAME }}"
+            export DAGSHUB_TOKEN="${{ secrets.DAGSHUB_TOKEN }}"
+            export S3_BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}"
+            export AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}"
+            export AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+            export AWS_REGION="${{ secrets.AWS_REGION }}"
+            export AWS_DEFAULT_REGION="${{ secrets.AWS_REGION }}"
+            export GF_SECURITY_ADMIN_PASSWORD="${{ secrets.GF_SECURITY_ADMIN_PASSWORD }}"
+
+            # ── Login to ECR ──
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+            # ── Go to project folder ──
+            cd ~/CyberGuard-url-detection-system
+
+            # ── Pull latest code ──
+            git pull origin main
+
+            # ── DVC pull to get data ──
+            dvc pull
+
+            # ── Pull latest Docker image ──
+            docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REGISTRY }}:latest
+
+            # ── Restart containers ──
+            docker-compose down
+            docker-compose up -d
+
+            echo "Deployment completed successfully!"
+          EOF
