@@ -481,6 +481,6 @@ docker-compose logs -f cyberguard-app
 ## Ayush Padaniya
 
 [![GitHub](https://img.shields.io/badge/GitHub-ayush--padaniya-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ayush-padaniya)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ayush_Padaniya-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](www.linkedin.com/in/ayush-padaniya-26b212318)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ayush_Padaniya-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/ayush-padaniya-26b212318)
 
 </div>
