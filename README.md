@@ -18,7 +18,7 @@
 
 <br/>
 
-[🌐 Live Demo](http://16.16.122.170:8000) · [📊 Grafana Dashboard](http://16.16.122.170:3001) · [📈 Prometheus](http://16.16.122.170:9090)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Application-CyberGuard_App-00B4CC?style=for-the-badge&labelColor=1a1a2e)](http://16.16.122.170:8000)
 
 </div>
 
@@ -26,20 +26,20 @@
 
 ## 📌 Table of Contents
 
-- [Business Problem](#-business-problem)
-- [Objective](#-objective)
-- [Solution](#-solution)
-- [Model Performance](#-model-performance)
-- [Tech Stack](#-tech-stack)
-- [MLOps Architecture](#-mlops-architecture)
-- [Project Structure](#-project-structure)
-- [ML Pipeline](#-ml-pipeline)
-- [Monitoring](#-monitoring)
-- [CI/CD Pipeline](#-cicd-pipeline)
-- [Screenshots](#-screenshots)
-- [Getting Started](#-getting-started)
-- [API Endpoints](#-api-endpoints)
-- [Author](#-author)
+- [🔴 Business Problem](#-business-problem)
+- [🎯 Objective](#-objective)
+- [✅ Solution](#-solution)
+- [📊 Model Performance](#-model-performance)
+- [🛠️ Tech Stack](#️-tech-stack)
+- [🏗️ MLOps Architecture](#️-mlops-architecture)
+- [📁 Project Structure](#-project-structure)
+- [🔄 ML Pipeline](#-ml-pipeline)
+- [📡 Monitoring](#-monitoring)
+- [⚙️ CI/CD Pipeline](#️-cicd-pipeline)
+- [📸 Screenshots](#-screenshots)
+- [🚀 Getting Started](#-getting-started)
+- [🔌 API Endpoints](#-api-endpoints)
+- [👨‍💻 Author](#-author)
 
 ---
 
@@ -485,20 +485,11 @@ docker-compose logs -f cyberguard-app
 
 ---
 
-## 🌐 Live URLs
 
-| Service | URL |
-|---------|-----|
-| App | http://16.16.122.170:8000 |
-| Grafana | http://16.16.122.170:3001 |
-| Prometheus | http://16.16.122.170:9090 |
-| Evidently | http://16.16.122.170:8000/monitoring/report |
-
----
 
 <div align="center">
 
----
+
 
 **Built by**
 
