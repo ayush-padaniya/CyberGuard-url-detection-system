@@ -340,30 +340,34 @@ SSH into EC2 → Set Env Vars → ECR Login
 ## 📸 Screenshots
 
 ### 🏠 Home Page — URL Scanner
-<!-- Add screenshot: app home page with URL input -->
-![Home Page](assets/screenshots/home.png)
-
-### 🔴 Result Page — Threat Detection
-<!-- Add screenshot: result page showing phishing detection -->
-![Result Page](assets/screenshots/result.png)
-
-### 📊 Grafana Dashboard
-<!-- Add screenshot: Grafana dashboard with all 10 panels -->
-![Grafana Dashboard](assets/screenshots/grafana.png)
-
-### 🚨 Alert Firing
-<!-- Add screenshot: Grafana alert firing red -->
-![Alert](assets/screenshots/alert.png)
-
-### 📉 Evidently AI Report
-<!-- Add screenshot: Evidently drift detection report -->
-![Evidently Report](assets/screenshots/evidently.png)
-
-### ✅ GitHub Actions CI/CD
-<!-- Add screenshot: GitHub Actions green ticks for CI and CD -->
-![CI/CD](assets/screenshots/cicd.png)
+<img src="https://i.ibb.co/Myh37Xvg/app.png" width="100%" alt="app">
+<img src="https://i.ibb.co/0NBGkbD/app2.png" width="100%" alt="app2">
 
 ---
+
+### 🔴 Result Page — Threat Detection
+
+<img src="https://i.ibb.co/vf9r0V6/Screenshot-2026-05-07-132252.png" width="100%" alt="URL Scanner Detection">
+
+
+### 📊 Grafana Dashboard
+<img src="https://i.ibb.co/LXJ547Mc/Screenshot-2026-05-07-130631.png" width="100%" alt="Dashboard 1">
+<img src="https://i.ibb.co/RTjL752h/Screenshot-2026-05-07-130646.png" width="100%" alt="Dashboard 2">
+
+---
+
+### 🚨 Alert Firing
+<img src="https://i.ibb.co/zh8QqBFz/Screenshot-2026-05-07-123615.png" width="100%" alt="Alert Firing">
+
+---
+
+### 📉 Evidently AI Report
+<img src="https://i.ibb.co/CK0HcVGW/evidently-ai-report.jpg" width="100%" alt="Evidently Report">
+
+---
+
+### ✅ GitHub Actions CI/CD
+<img src="https://i.ibb.co/FLHCWrcf/Screenshot-2026-05-07-123905.png" width="100%" alt="CI CD">
 
 ## 🚀 Getting Started
 
@@ -472,11 +476,11 @@ docker-compose logs -f cyberguard-app
 
 ---
 
-**Built with ❤️ by**
+**Built by**
 
 ## Ayush Padaniya
 
 [![GitHub](https://img.shields.io/badge/GitHub-ayush--padaniya-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ayush-padaniya)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ayush_Padaniya-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/ayush-padaniya)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ayush_Padaniya-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](www.linkedin.com/in/ayush-padaniya-26b212318)
 
 </div>
